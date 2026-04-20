@@ -131,13 +131,18 @@ function LegendCard({ legend, wins, losses, onWin, onLoss, onReset, rank }) {
     <div className={`card ${total > 0 ? 'has-data' : ''}`}>
       <div style={{
         position:'absolute',inset:0,
-        background:`linear-gradient(135deg, ${colors[0]}30 0%, ${colors[0]}10 40%, ${colors[1]}10 60%, ${colors[1]}30 100%)`,
+        background:`linear-gradient(135deg, ${colors[0]}28 0%, ${colors[0]}28 48%, transparent 48%, transparent 52%, ${colors[1]}28 52%, ${colors[1]}28 100%)`,
         borderRadius:12,pointerEvents:'none',
       }}/>
       <div style={{
-        position:'absolute',top:0,left:0,right:0,height:4,
-        background:`linear-gradient(90deg, ${colors[0]}, ${colors[1]})`,
-        borderRadius:'12px 12px 0 0',pointerEvents:'none',
+        position:'absolute',top:0,left:0,width:'50%',height:3,
+        background:colors[0],
+        borderRadius:'12px 0 0 0',pointerEvents:'none',
+      }}/>
+      <div style={{
+        position:'absolute',top:0,right:0,width:'50%',height:3,
+        background:colors[1],
+        borderRadius:'0 12px 0 0',pointerEvents:'none',
       }}/>
       <div className="card-rank">#{rank}</div>
       <div className="card-header">
