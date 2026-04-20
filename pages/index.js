@@ -99,7 +99,7 @@ function LegendCard({ legend, wins, losses, onWin, onLoss, onReset, rank }) {
       <div style={{
         position:'absolute',inset:0,
         backgroundImage:`url(/images/${legend.img}.avif)`,
-        backgroundSize:'cover',backgroundPosition:'center top',
+        backgroundSize:'180%',backgroundPosition:'center 25%',
         opacity:0.15,borderRadius:12,pointerEvents:'none',
       }}/>
       <div className="card-rank">#{rank}</div>
