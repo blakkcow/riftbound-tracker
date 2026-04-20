@@ -98,9 +98,6 @@ function LegendCard({ legend, wins, losses, onWin, onLoss, onReset, rank }) {
       <div className="card-header">
         <div className="card-name-block">
           <span className="card-name">{legend.name}</span>
-          <span className="card-role" style={{ color: roleColor, borderColor: roleColor + '44', background: roleColor + '15' }}>
-            {legend.role}
-          </span>
         </div>
         <span className="card-trend" title={trend.label}>{trend.icon}</span>
       </div>
@@ -126,14 +123,14 @@ function LegendCard({ legend, wins, losses, onWin, onLoss, onReset, rank }) {
 
       <div className="card-actions">
         <button className="btn-win" onClick={() => onWin(legend.id)} title="Ajouter une victoire">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M20 6L9 17l-5-5"/></svg>
+          <svg style={{width:12,height:12,flexShrink:0}} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M20 6L9 17l-5-5"/></svg>
           Victoire
         </button>
         <button className="btn-reset" onClick={() => onReset(legend.id)} title="Réinitialiser" disabled={total === 0}>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+          <svg style={{width:14,height:14,flexShrink:0}} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
         </button>
         <button className="btn-loss" onClick={() => onLoss(legend.id)} title="Ajouter une défaite">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg>
+          <svg style={{width:12,height:12,flexShrink:0}} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg>
           Défaite
         </button>
       </div>
@@ -184,7 +181,6 @@ function LegendCard({ legend, wins, losses, onWin, onLoss, onReset, rank }) {
           display: flex; align-items: center; justify-content: center; gap: 4px;
           transition: all 0.15s ease;
         }
-        .btn-win svg, .btn-loss svg, .btn-reset svg { width: 12px; height: 12px; flex-shrink: 0; }
         .btn-win { background: #1a3a1a; color: #2ECC71; border: 1px solid #2ECC7133; }
         .btn-win:hover { background: #2ECC71; color: #0a1a0a; transform: scale(1.02); }
         .btn-loss { background: #3a1a1a; color: #E74C3C; border: 1px solid #E74C3C33; }
@@ -393,16 +389,11 @@ export default function Home() {
         <header className="header">
           <div className="header-inner">
             <div className="logo-block">
-              <span className="logo-icon">🃏</span>
               <div>
                 <h1 className="logo-title">RIFTBOUND</h1>
                 <p className="logo-sub">Tracker de Winrate</p>
               </div>
             </div>
-            <button className="reset-all-btn" onClick={onResetAll}>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
-              Reset tout
-            </button>
           </div>
         </header>
 
@@ -412,38 +403,131 @@ export default function Home() {
 
           {/* Controls */}
           <div className="controls">
-            <div className="search-wrap">
-              <svg className="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+            <div style={{display:'flex',gap:12,alignItems:'center',marginBottom:8}}>
+              <div style={{position:'relative',flex:1,minWidth:200}}>
+              <svg style={{position:'absolute',left:14,top:'50%',transform:'translateY(-50%)',width:16,height:16,color:'#445',pointerEvents:'none'}} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
               <input
-                className="search-input"
                 placeholder="Rechercher une légende..."
                 value={search}
                 onChange={e => setSearch(e.target.value)}
+                style={{
+                  width:'100%',padding:'10px 14px 10px 40px',
+                  background:'linear-gradient(135deg, #0d1117, #111825)',
+                  border:'1px solid #1e2a3a',
+                  color:'#c8d8e8',borderRadius:10,
+                  fontFamily:"'Crimson Pro', serif",fontSize:15,
+                  outline:'none',
+                  boxShadow:'0 2px 8px rgba(0,0,0,0.25)',
+                }}
+                onFocus={e => {
+                  e.currentTarget.style.borderColor='rgba(200,168,75,0.4)';
+                  e.currentTarget.style.boxShadow='0 0 14px rgba(200,168,75,0.1)';
+                }}
+                onBlur={e => {
+                  e.currentTarget.style.borderColor='#1e2a3a';
+                  e.currentTarget.style.boxShadow='0 2px 8px rgba(0,0,0,0.25)';
+                }}
               />
+              </div>
+              <button
+                onClick={onResetAll}
+                style={{
+                  display:'flex',alignItems:'center',gap:6,
+                  background:'linear-gradient(135deg, #1a0a0a, #200e0e)',
+                  border:'1px solid rgba(231,76,60,0.3)',
+                  color:'rgba(231,76,60,0.7)',padding:'9px 18px',borderRadius:10,
+                  cursor:'pointer',fontFamily:"'Cinzel', serif",fontSize:11,
+                  fontWeight:700,letterSpacing:'0.06em',textTransform:'uppercase',
+                  boxShadow:'0 2px 10px rgba(0,0,0,0.3)',whiteSpace:'nowrap',
+                }}
+                onMouseEnter={e => {
+                  e.currentTarget.style.background='linear-gradient(135deg, #2a0808, #351010)';
+                  e.currentTarget.style.borderColor='rgba(231,76,60,0.6)';
+                  e.currentTarget.style.color='#E74C3C';
+                  e.currentTarget.style.boxShadow='0 4px 20px rgba(231,76,60,0.2)';
+                  e.currentTarget.style.transform='translateY(-1px)';
+                }}
+                onMouseLeave={e => {
+                  e.currentTarget.style.background='linear-gradient(135deg, #1a0a0a, #200e0e)';
+                  e.currentTarget.style.borderColor='rgba(231,76,60,0.3)';
+                  e.currentTarget.style.color='rgba(231,76,60,0.7)';
+                  e.currentTarget.style.boxShadow='0 2px 10px rgba(0,0,0,0.3)';
+                  e.currentTarget.style.transform='translateY(0)';
+                }}
+              >
+                <svg style={{width:14,height:14,flexShrink:0}} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+                Reset tout
+              </button>
             </div>
-            <div className="filter-group">
+            <div style={{display:'flex',gap:12,flexWrap:'wrap',marginBottom:8}}>
               {[
                 { v: 'all', l: 'Tous' },
                 { v: 'played', l: 'Joués' },
                 { v: 'unplayed', l: 'Non joués' },
                 { v: 'positive', l: '≥50%' },
                 { v: 'negative', l: '<50%' },
-              ].map(f => (
-                <button key={f.v} className={`filter-btn ${filter === f.v ? 'active' : ''}`} onClick={() => setFilter(f.v)}>
-                  {f.l}
-                </button>
-              ))}
+              ].map(f => {
+                const isActive = filter === f.v;
+                return (
+                  <button
+                    key={f.v}
+                    onClick={() => setFilter(f.v)}
+                    style={{
+                      padding:'11px 18px',
+                      border: isActive ? '1px solid rgba(200,168,75,0.5)' : '1px solid #1e2a3a',
+                      background: isActive ? 'linear-gradient(135deg, #1a1500, #252000)' : 'linear-gradient(135deg, #0d1117, #111825)',
+                      color: isActive ? '#c8a84b' : '#556',
+                      borderRadius:10, cursor:'pointer', fontSize:12,
+                      fontFamily:"'Cinzel', serif", fontWeight:700,
+                      letterSpacing:'0.06em', whiteSpace:'nowrap',
+                      boxShadow: isActive ? '0 0 14px rgba(200,168,75,0.12), inset 0 1px 0 rgba(200,168,75,0.1)' : '0 2px 8px rgba(0,0,0,0.25)',
+                      transition:'all 0.2s ease',
+                    }}
+                    onMouseEnter={e => {
+                      if (!isActive) {
+                        e.currentTarget.style.borderColor='#334';
+                        e.currentTarget.style.color='#99a';
+                        e.currentTarget.style.transform='translateY(-1px)';
+                        e.currentTarget.style.boxShadow='0 4px 14px rgba(0,0,0,0.35)';
+                      }
+                    }}
+                    onMouseLeave={e => {
+                      if (!isActive) {
+                        e.currentTarget.style.borderColor='#1e2a3a';
+                        e.currentTarget.style.color='#556';
+                        e.currentTarget.style.transform='translateY(0)';
+                        e.currentTarget.style.boxShadow='0 2px 8px rgba(0,0,0,0.25)';
+                      }
+                    }}
+                  >
+                    {f.l}
+                  </button>
+                );
+              })}
             </div>
-            <select className="sort-select" value={sort} onChange={e => setSort(e.target.value)}>
+            <select
+              value={sort}
+              onChange={e => setSort(e.target.value)}
+              style={{
+                padding:'9px 32px 9px 14px',
+                background:'#0d1117',border:'1px solid #1e2a3a',
+                color:'#778',borderRadius:10,fontFamily:"'Cinzel', serif",
+                fontSize:12,fontWeight:700,cursor:'pointer',outline:'none',
+                boxShadow:'0 2px 8px rgba(0,0,0,0.25)',
+                WebkitAppearance:'none',MozAppearance:'none',appearance:'none',
+                backgroundImage:"url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23556' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E\")",
+                backgroundRepeat:'no-repeat',backgroundPosition:'right 10px center',
+              }}
+            >
               <option value="default">Ordre original</option>
-              <option value="name">Nom A→Z</option>
+              <option value="name">Nom A-Z</option>
               <option value="winrate-desc">Winrate ↓</option>
               <option value="winrate-asc">Winrate ↑</option>
               <option value="games">Plus joués</option>
             </select>
           </div>
 
-          <p className="result-count">{filtered.length} légende{filtered.length > 1 ? 's' : ''} affichée{filtered.length > 1 ? 's' : ''}</p>
+          <p style={{fontSize:12,color:'#2a3a4a',marginTop:12,marginBottom:20,letterSpacing:'0.05em'}}>{filtered.length} légende{filtered.length > 1 ? 's' : ''} affichée{filtered.length > 1 ? 's' : ''}</p>
 
           {/* Grid */}
           <div className="grid">
@@ -519,7 +603,6 @@ export default function Home() {
           padding: 14px 0;
         }
         .logo-block { display: flex; align-items: center; gap: 12px; }
-        .logo-icon { font-size: 28px; }
         .logo-title {
           font-family: 'Cinzel', serif; font-size: 22px; font-weight: 900;
           color: #c8a84b; letter-spacing: 0.15em; line-height: 1;
@@ -528,47 +611,64 @@ export default function Home() {
         .logo-sub { font-size: 11px; color: #445; letter-spacing: 0.2em; text-transform: uppercase; margin-top: 2px; }
         .reset-all-btn {
           display: flex; align-items: center; gap: 6px;
-          background: transparent; border: 1px solid #E74C3C44;
-          color: #E74C3C88; padding: 8px 14px; border-radius: 8px;
+          background: #1a0a0a; border: 1px solid #E74C3C33;
+          color: #E74C3C77; padding: 9px 16px; border-radius: 10px;
           cursor: pointer; font-family: 'Cinzel', serif; font-size: 11px;
-          letter-spacing: 0.05em; text-transform: uppercase; transition: all 0.2s;
+          font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase;
+          transition: all 0.25s ease; box-shadow: 0 2px 8px rgba(0,0,0,0.2);
         }
-        .reset-all-btn svg { width: 14px; height: 14px; }
-        .reset-all-btn:hover { background: #E74C3C11; color: #E74C3C; border-color: #E74C3C88; }
+        .reset-all-btn:hover {
+          background: #2a0a0a; color: #E74C3C; border-color: #E74C3C88;
+          transform: translateY(-1px); box-shadow: 0 4px 16px rgba(231,76,60,0.15);
+        }
 
         .main { max-width: 1400px; margin: 0 auto; padding: 40px 24px; position: relative; z-index: 1; }
 
         .controls {
-          display: flex; align-items: center; gap: 12px; margin-bottom: 12px;
-          flex-wrap: wrap;
+          display: flex; flex-direction: column; align-items: stretch; gap: 28px;
+          margin-top: 24px; margin-bottom: 24px;
         }
         .search-wrap { position: relative; flex: 1; min-width: 200px; }
-        .search-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); width: 16px; height: 16px; color: #445; pointer-events: none; }
         .search-input {
           width: 100%; padding: 10px 12px 10px 38px;
-          background: #0d1b2a; border: 1px solid #1e2a3a;
+          background: #0d1117; border: 1px solid #1e2a3a;
           color: #c8d8e8; border-radius: 10px; font-family: 'Crimson Pro', serif; font-size: 15px;
-          outline: none; transition: border-color 0.2s;
+          outline: none; transition: all 0.25s ease;
+          box-shadow: 0 2px 8px rgba(0,0,0,0.2);
         }
-        .search-input::placeholder { color: #2a3a4a; }
-        .search-input:focus { border-color: #c8a84b44; }
+        .search-input::placeholder { color: #334; }
+        .search-input:focus { border-color: #c8a84b66; box-shadow: 0 0 12px rgba(200,168,75,0.1); }
 
-        .filter-group { display: flex; gap: 4px; flex-wrap: wrap; }
+        .filter-group { display: flex; gap: 6px; flex-wrap: wrap; }
         .filter-btn {
-          padding: 8px 12px; border: 1px solid #1e2a3a; background: #0d1b2a;
-          color: #445; border-radius: 8px; cursor: pointer; font-size: 12px;
-          font-family: 'Cinzel', serif; letter-spacing: 0.04em; transition: all 0.2s;
-          white-space: nowrap;
+          padding: 9px 16px; border: 1px solid #1e2a3a; background: #0d1117;
+          color: #556; border-radius: 10px; cursor: pointer; font-size: 12px;
+          font-family: 'Cinzel', serif; font-weight: 600; letter-spacing: 0.05em;
+          transition: all 0.25s ease; white-space: nowrap;
+          box-shadow: 0 2px 8px rgba(0,0,0,0.2);
         }
-        .filter-btn.active { background: #c8a84b15; border-color: #c8a84b55; color: #c8a84b; }
-        .filter-btn:hover:not(.active) { border-color: #2a3a4a; color: #667; }
+        .filter-btn.active {
+          background: linear-gradient(135deg, #1a1500 0%, #2a2000 100%);
+          border-color: #c8a84b88; color: #c8a84b;
+          box-shadow: 0 0 12px rgba(200,168,75,0.15), inset 0 1px 0 rgba(200,168,75,0.1);
+        }
+        .filter-btn:hover:not(.active) {
+          border-color: #334; color: #889; background: #111825;
+          transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
 
         .sort-select {
-          padding: 8px 12px; background: #0d1b2a; border: 1px solid #1e2a3a;
-          color: #667; border-radius: 8px; font-family: 'Cinzel', serif; font-size: 12px;
-          cursor: pointer; outline: none; transition: border-color 0.2s;
+          padding: 9px 14px; background: #0d1117; border: 1px solid #1e2a3a;
+          color: #778; border-radius: 10px; font-family: 'Cinzel', serif; font-size: 12px;
+          font-weight: 600; cursor: pointer; outline: none; transition: all 0.25s ease;
+          box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+          -webkit-appearance: none; -moz-appearance: none; appearance: none;
+          padding-right: 32px;
+          background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23556' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+          background-repeat: no-repeat; background-position: right 10px center;
         }
-        .sort-select:focus { border-color: #c8a84b44; }
+        .sort-select:hover { border-color: #334; color: #889; background-color: #111825; }
+        .sort-select:focus { border-color: #c8a84b66; box-shadow: 0 0 12px rgba(200,168,75,0.1); }
 
         .result-count { font-size: 12px; color: #2a3a4a; margin-bottom: 20px; letter-spacing: 0.05em; }
 
