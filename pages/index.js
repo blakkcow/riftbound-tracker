@@ -1,5 +1,7 @@
 import Head from 'next/head';
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
+import { useQuery, useMutation } from 'convex/react';
+import { api } from '../convex/_generated/api';
 
 const LEGENDS = [
   { id: 'lux', name: 'Lux', role: 'Mage' },
@@ -257,37 +259,89 @@ function GlobalStats({ stats }) {
   );
 }
 
+const PROFILE_KEY = 'riftbound-profile-code';
+
+function getInitialRecords() {
+  const init = {};
+  LEGENDS.forEach(l => { init[l.id] = { wins: 0, losses: 0 }; });
+  return init;
+}
+
 export default function Home() {
-  const [records, setRecords] = useState(() => {
-    const init = {};
-    LEGENDS.forEach(l => { init[l.id] = { wins: 0, losses: 0 }; });
-    return init;
-  });
+  const [profileCode, setProfileCode] = useState('');
+  const [inputCode, setInputCode] = useState('');
+  const [connected, setConnected] = useState(false);
+  const [records, setRecords] = useState(getInitialRecords);
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState('all');
   const [sort, setSort] = useState('default');
-  const [loaded, setLoaded] = useState(false);
   const [toast, setToast] = useState(null);
+  const saveTimer = useRef(null);
 
+  const cloudData = useQuery(
+    api.profiles.get,
+    connected && profileCode ? { code: profileCode } : "skip"
+  );
+  const saveToCloud = useMutation(api.profiles.save);
+
+  // Load profile code from localStorage on mount
   useEffect(() => {
-    try {
-      const saved = localStorage.getItem(STORAGE_KEY);
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        setRecords(prev => {
-          const merged = { ...prev };
-          Object.keys(parsed).forEach(k => { if (merged[k] !== undefined) merged[k] = parsed[k]; });
-          return merged;
-        });
-      }
-    } catch {}
-    setLoaded(true);
+    const saved = localStorage.getItem(PROFILE_KEY);
+    if (saved) {
+      setProfileCode(saved);
+      setInputCode(saved);
+      setConnected(true);
+    }
   }, []);
 
+  // When cloud data arrives, merge it into records
   useEffect(() => {
-    if (!loaded) return;
+    if (cloudData && cloudData.records) {
+      try {
+        const parsed = JSON.parse(cloudData.records);
+        setRecords(prev => {
+          const merged = { ...prev };
+          Object.keys(parsed).forEach(k => {
+            if (merged[k] !== undefined) merged[k] = parsed[k];
+          });
+          return merged;
+        });
+      } catch {}
+    }
+  }, [cloudData]);
+
+  // Debounced save to cloud when records change
+  const syncToCloud = useCallback((newRecords) => {
+    if (!connected || !profileCode) return;
+    if (saveTimer.current) clearTimeout(saveTimer.current);
+    saveTimer.current = setTimeout(() => {
+      saveToCloud({ code: profileCode, records: JSON.stringify(newRecords) });
+    }, 800);
+  }, [connected, profileCode, saveToCloud]);
+
+  // Also keep localStorage as fallback
+  useEffect(() => {
+    if (!connected) return;
     try { localStorage.setItem(STORAGE_KEY, JSON.stringify(records)); } catch {}
-  }, [records, loaded]);
+    syncToCloud(records);
+  }, [records, connected, syncToCloud]);
+
+  const handleConnect = () => {
+    const code = inputCode.trim();
+    if (!code) return;
+    setProfileCode(code);
+    setConnected(true);
+    localStorage.setItem(PROFILE_KEY, code);
+    showToast(`Connecté : ${code}`, 'win');
+  };
+
+  const handleDisconnect = () => {
+    setConnected(false);
+    setProfileCode('');
+    setInputCode('');
+    localStorage.removeItem(PROFILE_KEY);
+    showToast('Déconnecté', 'reset');
+  };
 
   const showToast = (msg, type = 'win') => {
     setToast({ msg, type });
@@ -296,26 +350,34 @@ export default function Home() {
 
   const onWin = (id) => {
     const name = LEGENDS.find(l => l.id === id)?.name;
-    setRecords(prev => ({ ...prev, [id]: { ...prev[id], wins: prev[id].wins + 1 } }));
+    setRecords(prev => {
+      const next = { ...prev, [id]: { ...prev[id], wins: prev[id].wins + 1 } };
+      return next;
+    });
     showToast(`+1 Victoire — ${name}`, 'win');
   };
 
   const onLoss = (id) => {
     const name = LEGENDS.find(l => l.id === id)?.name;
-    setRecords(prev => ({ ...prev, [id]: { ...prev[id], losses: prev[id].losses + 1 } }));
+    setRecords(prev => {
+      const next = { ...prev, [id]: { ...prev[id], losses: prev[id].losses + 1 } };
+      return next;
+    });
     showToast(`+1 Défaite — ${name}`, 'loss');
   };
 
   const onReset = (id) => {
     const name = LEGENDS.find(l => l.id === id)?.name;
-    setRecords(prev => ({ ...prev, [id]: { wins: 0, losses: 0 } }));
+    setRecords(prev => {
+      const next = { ...prev, [id]: { wins: 0, losses: 0 } };
+      return next;
+    });
     showToast(`Reset — ${name}`, 'reset');
   };
 
   const onResetAll = () => {
     if (!confirm('Remettre tous les scores à zéro ?')) return;
-    const reset = {};
-    LEGENDS.forEach(l => { reset[l.id] = { wins: 0, losses: 0 }; });
+    const reset = getInitialRecords();
     setRecords(reset);
     showToast('Tous les scores remis à zéro', 'reset');
   };
@@ -393,6 +455,68 @@ export default function Home() {
                 <h1 className="logo-title">RIFTBOUND</h1>
                 <p className="logo-sub">Tracker de Winrate</p>
               </div>
+            </div>
+            <div style={{display:'flex',alignItems:'center',gap:8}}>
+              {connected ? (
+                <>
+                  <span style={{
+                    display:'flex',alignItems:'center',gap:6,
+                    padding:'7px 14px',borderRadius:10,fontSize:12,
+                    fontFamily:"'Cinzel', serif",fontWeight:700,
+                    background:'linear-gradient(135deg, #0a1a0a, #0e200e)',
+                    border:'1px solid rgba(46,204,113,0.3)',color:'#2ECC71',
+                    letterSpacing:'0.04em',
+                  }}>
+                    <span style={{width:8,height:8,borderRadius:'50%',background:'#2ECC71',boxShadow:'0 0 8px rgba(46,204,113,0.5)'}}/>
+                    {profileCode}
+                  </span>
+                  <button
+                    onClick={handleDisconnect}
+                    style={{
+                      padding:'7px 12px',borderRadius:10,fontSize:11,
+                      fontFamily:"'Cinzel', serif",fontWeight:700,
+                      background:'linear-gradient(135deg, #1a0a0a, #200e0e)',
+                      border:'1px solid rgba(231,76,60,0.3)',color:'rgba(231,76,60,0.7)',
+                      cursor:'pointer',textTransform:'uppercase',letterSpacing:'0.05em',
+                    }}
+                    onMouseEnter={e => { e.currentTarget.style.color='#E74C3C'; e.currentTarget.style.borderColor='rgba(231,76,60,0.6)'; }}
+                    onMouseLeave={e => { e.currentTarget.style.color='rgba(231,76,60,0.7)'; e.currentTarget.style.borderColor='rgba(231,76,60,0.3)'; }}
+                  >
+                    Déco
+                  </button>
+                </>
+              ) : (
+                <>
+                  <input
+                    placeholder="Code profil..."
+                    value={inputCode}
+                    onChange={e => setInputCode(e.target.value)}
+                    onKeyDown={e => { if (e.key === 'Enter') handleConnect(); }}
+                    style={{
+                      padding:'8px 14px',borderRadius:10,fontSize:13,
+                      fontFamily:"'Crimson Pro', serif",
+                      background:'linear-gradient(135deg, #0d1117, #111825)',
+                      border:'1px solid #1e2a3a',color:'#c8d8e8',
+                      outline:'none',width:150,
+                    }}
+                  />
+                  <button
+                    onClick={handleConnect}
+                    style={{
+                      padding:'8px 16px',borderRadius:10,fontSize:11,
+                      fontFamily:"'Cinzel', serif",fontWeight:700,
+                      background:'linear-gradient(135deg, #1a1500, #252000)',
+                      border:'1px solid rgba(200,168,75,0.4)',color:'#c8a84b',
+                      cursor:'pointer',textTransform:'uppercase',letterSpacing:'0.05em',
+                      whiteSpace:'nowrap',
+                    }}
+                    onMouseEnter={e => { e.currentTarget.style.borderColor='rgba(200,168,75,0.7)'; e.currentTarget.style.boxShadow='0 0 14px rgba(200,168,75,0.15)'; }}
+                    onMouseLeave={e => { e.currentTarget.style.borderColor='rgba(200,168,75,0.4)'; e.currentTarget.style.boxShadow='none'; }}
+                  >
+                    Sync
+                  </button>
+                </>
+              )}
             </div>
           </div>
         </header>
