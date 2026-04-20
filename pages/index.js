@@ -339,7 +339,9 @@ export default function Home() {
     setConnected(false);
     setProfileCode('');
     setInputCode('');
+    setRecords(getInitialRecords());
     localStorage.removeItem(PROFILE_KEY);
+    localStorage.removeItem(STORAGE_KEY);
     showToast('Déconnecté', 'reset');
   };
 
