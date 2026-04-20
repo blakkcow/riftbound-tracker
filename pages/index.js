@@ -46,16 +46,47 @@ const LEGENDS = [
   { id: 'poppy', name: 'Poppy', role: 'Tank', img: 'poppy' },
 ];
 
-const ROLE_COLORS = {
-  'Mage': '#7B5EA7',
-  'Combattant': '#C0392B',
-  'Duelliste': '#E67E22',
-  'Tank': '#2980B9',
-  'Tireur': '#27AE60',
-  'Assassin': '#8E44AD',
-  'Soutien': '#16A085',
-  'Éclaireur': '#F39C12',
-  'Gardienne': '#D4AC0D',
+const LEGEND_COLORS = {
+  'lux': ['#2E86C1', '#F1C40F'],
+  'garen': ['#D4AC0D', '#C0392B'],
+  'yasuo': ['#5DADE2', '#1A5276'],
+  'darius': ['#922B21', '#6C3483'],
+  'teemo': ['#27AE60', '#F39C12'],
+  'viktor': ['#8E44AD', '#F1C40F'],
+  'leona': ['#F39C12', '#E74C3C'],
+  'miss-fortune': ['#E74C3C', '#F39C12'],
+  'volibear': ['#2E86C1', '#AED6F1'],
+  'maitre-yi': ['#F1C40F', '#27AE60'],
+  'jinx': ['#E74C3C', '#2E86C1'],
+  'ahri': ['#AF7AC5', '#F1948A'],
+  'lee-sin': ['#E67E22', '#C0392B'],
+  'annie': ['#E74C3C', '#6C3483'],
+  'kaisa': ['#6C3483', '#E74C3C'],
+  'sett': ['#C0392B', '#F39C12'],
+  'azir': ['#F1C40F', '#2E86C1'],
+  'sivir': ['#F39C12', '#2E86C1'],
+  'irelia': ['#AF7AC5', '#2E86C1'],
+  'renata': ['#27AE60', '#6C3483'],
+  'ezreal': ['#F1C40F', '#2E86C1'],
+  'rumble': ['#E74C3C', '#F39C12'],
+  'fiora': ['#E74C3C', '#F1C40F'],
+  'ornn': ['#C0392B', '#5D6D7E'],
+  'lucian': ['#2E86C1', '#F1C40F'],
+  'draven': ['#C0392B', '#F1C40F'],
+  'reksai': ['#6C3483', '#C0392B'],
+  'jax': ['#6C3483', '#F39C12'],
+  'lillia': ['#AF7AC5', '#27AE60'],
+  'khazix': ['#6C3483', '#27AE60'],
+  'diana': ['#5DADE2', '#AED6F1'],
+  'ivern': ['#27AE60', '#82E0AA'],
+  'leblanc': ['#2E86C1', '#F1C40F'],
+  'vex': ['#5D6D7E', '#6C3483'],
+  'jhin': ['#C0392B', '#F1C40F'],
+  'vi': ['#E74C3C', '#F1948A'],
+  'rengar': ['#F39C12', '#27AE60'],
+  'pyke': ['#1A5276', '#27AE60'],
+  'maitre-yi-unleashed': ['#E74C3C', '#F1C40F'],
+  'poppy': ['#2E86C1', '#F1C40F'],
 };
 
 const STORAGE_KEY = 'riftbound-tracker-v1';
@@ -92,15 +123,19 @@ function LegendCard({ legend, wins, losses, onWin, onLoss, onReset, rank }) {
   const wr = getWinRate(wins, losses);
   const trend = getTrend(wr);
   const total = wins + losses;
-  const roleColor = ROLE_COLORS[legend.role] || '#888';
+  const colors = LEGEND_COLORS[legend.id] || ['#333', '#555'];
 
   return (
     <div className={`card ${total > 0 ? 'has-data' : ''}`}>
       <div style={{
         position:'absolute',inset:0,
-        backgroundImage:`url(/images/${legend.img}.avif)`,
-        backgroundSize:'180%',backgroundPosition:'center 25%',
-        opacity:0.15,borderRadius:12,pointerEvents:'none',
+        background:`linear-gradient(135deg, ${colors[0]}22 0%, ${colors[1]}22 100%)`,
+        borderRadius:12,pointerEvents:'none',
+      }}/>
+      <div style={{
+        position:'absolute',top:0,left:0,right:0,height:3,
+        background:`linear-gradient(90deg, ${colors[0]}, ${colors[1]})`,
+        borderRadius:'12px 12px 0 0',pointerEvents:'none',
       }}/>
       <div className="card-rank">#{rank}</div>
       <div className="card-header">
